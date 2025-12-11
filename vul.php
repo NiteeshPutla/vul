@@ -7,12 +7,13 @@ $username = $_POST['username'];
 $password = $_POST['password'];
 
 // Assume $mysqli is a valid connection to a database.
-// This is the VULNERABLE part: The user input is concatenated directly into the SQL query string.
+// FIXED: Using prepared statements to prevent SQL injection
 
-$sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'"; 
-// Vulnerability: An attacker can change the logic of the query using special characters.
-
-$result = $mysqli->query($sql);
+$sql = "SELECT * FROM users WHERE username = ? AND password = ?"; 
+$stmt = $mysqli->prepare($sql);
+$stmt->bind_param("ss", $username, $password);
+$stmt->execute();
+$result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
     echo "Login successful! Welcome, $username.";
